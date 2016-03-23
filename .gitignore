@@ -1,0 +1,7 @@
+.project
+.settings/
+frameworks/
+runtime/
+MyGame.cfg
+MyGame.udf
+
