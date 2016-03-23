@@ -15,8 +15,10 @@ GameView.ADD_BUG_INTERVAL_MIN = 1
 GameView.ADD_BUG_INTERVAL_MAX = 3
 
 GameView.IMAGE_FILENAMES = {}
-GameView.IMAGE_FILENAMES[BugBase.BUG_TYPE_ANT] = "SevlerKingShark.png"
-GameView.IMAGE_FILENAMES[BugBase.BUG_TYPE_SPIDER] = "SevlerKingShark.png"
+
+GameView.IMAGE_FILENAMES[BugBase.BUG_TYPE_ANT] = "BugAnt.png"
+GameView.IMAGE_FILENAMES[BugBase.BUG_TYPE_SPIDER] = "BugSpider.png"
+
 
 GameView.BUG_ANIMATION_TIMES = {}
 GameView.BUG_ANIMATION_TIMES[BugBase.BUG_TYPE_ANT] = 0.15
@@ -154,12 +156,16 @@ function GameView:onCreate()
         -- load image
         local texture = display.loadImage(filename)
         local frameWidth = texture:getPixelsWide() / 3
-        local frameHeight = texture:getPixelsHigh() /3
+
+        local frameHeight = texture:getPixelsHigh()
+
 
         -- create sprite frame based on image
         local frames = {}
         for i = 0, 1 do
+
             local frame = display.newSpriteFrame(texture, cc.rect(frameWidth * i - 50, 0, frameWidth + 10, frameHeight))
+
             frames[#frames + 1] = frame
         end
 

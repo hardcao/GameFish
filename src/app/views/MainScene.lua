@@ -1,32 +1,29 @@
 
 local MainScene = class("MainScene", cc.load("mvc").ViewBase)
-local FishSprite = import(".FishSprite")
-MainScene.RESOURCE_FILENAME = "battleScene.csb"
+
 
 function MainScene:onCreate()
-    printf("resource node = %s", tostring(self:getResourceNode()))
-
-     local sprite = FishSprite:create("fish3.png", "fish3.plist", "#bk_01.png", "bk_%02d.png", 1, 14, display.cx, display.cy)
-     
-    --sprite:align(display.CENTER,positionX,positionY)
-    sprite:addTo(self)
-  
-    --sprite:runAction(cc.RepeatForever:create( cc.Animate:create(animMixed) ) )
-   -- self:addChild(sprite)
-
+    -- add background image
+    
+    local cache = cc.SpriteFrameCache:getInstance()
+    local filename = "fish3"
    
-end
+    cache:addSpriteFrames("fish3.plist", "fish3.png")
 
-function MainScene:createLabel()
- cc.Label:createWithSystemFont("test", "Marker Felt.ttf", 96)
-    :align(display.CENTER, display.cx, display.cy)
-    :addTo(self)
+   local sprite = display.newSprite("#bk_01.png")
+    sprite:align(display.CENTER,20,display.cy)
+    sprite:addTo(self)
+    sprite:setScale(2)
 
-end
-function MainScene:onEnter()
-end
- 
-function MainScene:onExit()
+    --local animFrames = {}
+    --for i = 1,14 do 
+      --  local frame = cache:getSpriteFrame( string.format("bk_%02d.png", i) )
+      --  animFrames[i] = frame
+   -- end
+  --  local animation = display.newAnimation(animFrames, 0.3)
+        -- caching animation
+   --   self:playAnimationForever(display.getAnimationCache(self.animationName_))
+    
 end
 
 return MainScene
