@@ -19,9 +19,9 @@ function Bullet:initWithBulletType(bulletType, gameLayer, pBatchNodeBullet, pBat
 {
         self.m_bCaught = false;
         self.m_nBulletType= bulletType
-        self.m_pSpriteBullet= gameLayer
+        self.m_pGameLayer = gameLayer
         local bulletName =  string.format("bullet0%d.png",m_nBulletType)
-        self:setSpriteBullet(display.newSprite(bulletName))
+        self:m_pSpriteBullet=display.newSprite(bulletName)
         m_pSpriteBullet:align(520, 50);
         pBatchNodeBullet:addChild(m_pSpriteBullet);
 
@@ -37,49 +37,48 @@ function Bullet:initWithBulletType(bulletType, gameLayer, pBatchNodeBullet, pBat
 
 function Bullet:shootTo(targetDirection)
 {
-    Point ptFrom = self:m_pSpriteBullet:getPosition();
-    Point ptTo = targetDirection;
-    float angle = atan2f(ptTo.y - ptFrom.y, ptTo.x - ptFrom.x);
-    float rotation = angle / M_PI * 180.0f;
-    m_pSpriteBullet->setRotation(90.0f - rotation);
+    local ptFrom = self:m_pSpriteBullet:getPosition();
+    local ptTo = targetDirection;
+    local angle = atan2f(ptTo.y - ptFrom.y, ptTo.x - ptFrom.x);
+    local rotation = angle / M_PI * 180.0f;
+    m_pSpriteBullet:setRotation(90.0f - rotation);
     
-	Size size = Director::getInstance()->getWinSize(); 
+	local size = cc.Director:getInstance():getWinSize(); 
     
-    float distance =MAX(size.width, size.height); 
-    Point targetPt = ccp(ptFrom.x + distance * cosf(angle), ptFrom.y + distance * sinf(angle));
-    FiniteTimeAction *moveto = MoveTo::create(1.0f, targetPt);
-    FiniteTimeAction *callFunc = CCCallFunc::create(this, callfunc_selector(Bullet::removeSelf));
-    FiniteTimeAction *sequence = Sequence::create(moveto, callFunc, NULL);
-    m_pSpriteBullet->runAction(sequence);
+    local distance =MAX(size.width, size.height); 
+    local targetPt = cc.p(ptFrom.x + distance * cosf(angle), ptFrom.y + distance * sinf(angle));
+    local moveto = cc.MoveTo:create(1.0f, targetPt);
+    local callFunc = cc.CCCallFunc:create(this, callfunc_selector(Bullet:removeSelf));
+    local sequence = cc.Sequence:create(moveto, callFunc, NULL);
+    m_pSpriteBullet:runAction(sequence);
 }
 
-void Bullet::showNet()
+function Bullet:showNet()
 {
-    m_bCaught = true;
-    m_pSpriteBullet->stopAllActions();
-    m_pSpriteBullet->setVisible(false);
-    m_pSpriteNet->setVisible(true);
+    self.m_bCaught = true;
+    self.m_pSpriteBullet:stopAllActions();
+    self.m_pSpriteBullet:setVisible(false);
+    self.m_pSpriteNet:setVisible(true);
      
-    ScaleTo *scale = ScaleTo::create(0.3f, 1.25f);
-    FiniteTimeAction *callFunc = CCCallFunc::create(this, callfunc_selector(Bullet::removeSelf));
-    FiniteTimeAction *sequence = Sequence::create(scale, callFunc, NULL);
-    m_pSpriteNet->runAction(sequence);
-    m_pSpriteNet->setPosition(m_pSpriteBullet->getPosition());
+    local scale = cc.ScaleTo:create(0.3f, 1.25f);
+    local sequence = cc.Sequence::create(scale, cc.CallFunc:create(Bullet::removeSelf)), NULL);
+    m_pSpriteNet:runAction(sequence);
+    m_pSpriteNet:setPosition(m_pSpriteBullet->getPosition());
     
-    ParticleSystem *particle = ParticleSystemQuad::create("netparticle.plist");
-    particle->setPosition(m_pSpriteNet->getPosition());
-    particle->setPositionType(kCCPositionTypeGrouped);
-    particle->setAutoRemoveOnFinish(true);
-    m_pGameLayer->addChild(particle, 100);
+    local particle = cc.ParticleSystemQuad:create("netparticle.plist");
+    particle:setPosition(m_pSpriteNet->getPosition());
+    particle:setPositionType(kCCPositionTypeGrouped);
+    particle:setAutoRemoveOnFinish(true);
+    m_pGameLayer:addChild(particle, 100);
 
 }
 
-void Bullet::removeSelf()
+function Bullet:removeSelf()
 {
-    CCLOG("remove bullet");
-    this->getGameLayer()->getBullets()->removeObject(this);
-    m_pSpriteBullet->removeFromParentAndCleanup(true);
-    m_pSpriteNet->removeFromParentAndCleanup(true);
+   
+    self.m_pGameLayer:getBullets():removeObject(this);
+     self.m_pSpriteBullet:removeFromParentAndCleanup(true);
+    self.m_pSpriteNet:removeFromParentAndCleanup(true);
 }
 
 return Bullet
