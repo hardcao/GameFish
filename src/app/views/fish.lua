@@ -1,41 +1,16 @@
-#include "Fish.h"
-#include "GameLayer.h"
+local Fish = class("Fish")
 
-USING_NS_CC;
-
-local Fish = class("FishSprite", function(fishType, gameLayer, pBatchNode)
-    local cache = cc.SpriteFrameCache:getInstance()
-    local filename = "fish3"
-   
-    cache:addSpriteFrames(plistFileName, imageFilename)
-
-   local sprite = display.newSprite(startImageName)
- 
-
-    local moreFrames = {}
-    for i = startFrameIndex,endFameIndex do
-        local frame = cache:getSpriteFrame(string.format(stringFormat,i))
-        moreFrames[i] = frame
-    end
-
-    
-    local animMixed = cc.Animation:createWithSpriteFrames(moreFrames, 0.3)
-    sprite:runAction(cc.RepeatForever:create( cc.Animate:create(animMixed) ) )
-    sprite:align(display.CENTER,positionX,positionY)
-    return sprite;
-end)
-
-Fish *Fish::createWithFishType(int fishType, GameLayer *gameLayer, SpriteBatchNode *pBatchNode)
+function Fish::createWithFishType(fishType, gameLayer, pBatchNode)
 {
-    Fish *fish = new Fish();
-    if(fish && fish->initWithFishType(fishType, gameLayer, pBatchNode) )
+    
+    if(self:initWithFishType(fishType, gameLayer, pBatchNode) )
     {
-        fish->autorelease();
-        return fish;
+        
+        return self;
     }
     else
     {
-        delete fish;
+        delete self;
         return NULL;
     }
 }
@@ -56,13 +31,31 @@ function Fish:initWithFishType(fishType, gameLayer, pBatchNode)
         local frame = cache:getSpriteFrame(string.format("fish%02d_%02d.png",i))
         moreFrames[i] = frame
     end
+    local animMixed = cc.Animation:createWithSpriteFrames(moreFrames, 0.3)
+    local animate = cc.Animate:create(animMixed)
+   
+    local swing = cc.RepeatForever:create( cc.Animate:create(animMixed))
+    local originalFrameName = string.format("fish%02d_01.png",fishType)
+    local m_pSpriteFish = display.newSprite(originalFrameName)
+    m_pSpriteFish:runAction(swing)
+    m_pSpriteFish:align(display.CENTER,positionX,positionY)
+    MoveTo *moveto = self:getPath()
     
+
+    local releaseFunc = cc.CCCallFunc:create(self, callfunc_selector(self:removeSelf));
+    local sequence = cc.Sequence:create(moveto, releaseFunc, NULL);
+    m_pSpriteFish:runAction(sequence);
+    
+    self:getGameLayer():getFishes():addObject(this);
+
+    this:getBatchNodeFish():addChild(m_pSpriteFish);
+    return true
 end
 
 
 
 
-bool Fish::initWithFishType(int fishType, GameLayer *gameLayer, SpriteBatchNode *pBatchNode)
+function Fish:initWithFishType(fishType, gameLayer, pBatchNode)
 {
     m_bCaught = false; 
     this->setFishType(fishType);
@@ -115,52 +108,52 @@ bool Fish::initWithFishType(int fishType, GameLayer *gameLayer, SpriteBatchNode 
 }
 
 
-void Fish::showCaught()
+function Fish:showCaught()
 {
 
     m_bCaught = true;
-    m_pSpriteFish->stopAllActions();
+    m_pSpriteFish:stopAllActions();
     
-    if(m_bParticleBubble && m_pParticleBubble){
-        m_pParticleBubble->stopAllActions();
-        m_pParticleBubble->setVisible(false);
-    }
+    if m_bParticleBubble && m_pParticleBubble then
+        m_pParticleBubble:stopAllActions();
+        m_pParticleBubble:setVisible(false);
+    end
     
-    CCArray *frames = CCArray::createWithCapacity(11);
+    lcoal frames = {};
 
     for(int i = 1; i <= 4; i++) 
     {
 
-        String *frameName = String::createWithFormat("fish%02d_catch_%02d.png", m_nFishType ,i);
-		SpriteFrame *pFrame = SpriteFrameCache::getInstance()->spriteFrameByName(frameName->getCString());
-        if(pFrame){
-           frames->addObject(pFrame);
-        }
+        local frameName = string.format("fish%02d_catch_%02d.png", m_nFishType ,i);
+		local *pFrame = cc.SpriteFrameCache:getInstance():getSpriteFrame(frameName);
+        
+        frames[i] = frame
+        
     }
    
-    Animation *animation = cocos2d::Animation::createWithSpriteFrames(frames, 0.3f);
-    Animate *animate = Animate::create(animation);
+    local animation = cc.Animation:createWithSpriteFrames(frames, 0.3f);
+    local animate = cc.Animate:create(animation);
 
-    FiniteTimeAction *callFunc = CCCallFunc::create(this, callfunc_selector(Fish::removeSelf));
-    FiniteTimeAction *sequence = Sequence::create(animate, callFunc, NULL);
-    m_pSpriteFish->runAction(sequence);
+    local callFunc = cc.CCCallFunc:create(this, callfunc_selector(Fish::removeSelf));
+    local sequence = cc.Sequence:create(animate, callFunc, NULL);
+    m_pSpriteFish:runAction(sequence);
     
 }
 
-void Fish::offsetPoint(Point& pt, float offsetX, float offsetY)
+function Fish:offsetPoint(float offsetX, float offsetY)
 {
+    local pt;
     pt.x += offsetX;
     pt.y += offsetY;
+    return pt;
 }
 
-void Fish::getPath(cocos2d::CCMoveTo *&moveto)
-{
-    Size fishSize = m_pSpriteFish->getContentSize();
-	Size winSize = cocos2d::Director::getInstance()->getWinSize();
-    
-    Point ptStart, ptEnd;
-    float radius = MAX(fishSize.width, fishSize.height) / 2;
-    switch (rand() % 4) {
+function Fish:getPath() {
+    local fishSize = m_pSpriteFish:getContentSize()
+    local windowSize = cc.Director:getInstance():getWinSize()
+    local ptStart, ptEnd;
+    local radius = MAX(fishSize.width, fishSize.height) / 2
+    switch (math.random() % 4) {
           
         case 0:
             ptStart.x = - radius;
@@ -195,39 +188,46 @@ void Fish::getPath(cocos2d::CCMoveTo *&moveto)
         default:
             break;
     }
-  
-    float angle = atan2f(ptEnd.y - ptStart.y, ptEnd.x - ptStart.x);
 
-    float rotation = 180.0f - angle * 180.0f / M_PI;
+    local angle = atan2f(ptEnd.y - ptStart.y, ptEnd.x - ptStart.x);
+
+    local rotation = 180.0f - angle * 180.0f / M_PI;
     
 
-    float duration = rand() % 10 + 4.0f;
+    local duration = math.random() % 4 % 10 + 4.0f;
    
-    m_pSpriteFish->setPosition(ptStart);
-    m_pSpriteFish->setRotation(rotation);
+    m_pSpriteFish:setPosition(ptStart);
+    m_pSpriteFish:setRotation(rotation);
+
+    local moveto = cc.MoveTo::create(duration, ptEnd);
+
+    if m_bParticleBubble then
     
-    moveto = MoveTo::create(duration, ptEnd);
-    
-    if(m_bParticleBubble)
-    {
-        this->setParticleBubble(ParticleSystemQuad::create("bubble.plist"));
-        m_pGameLayer->addChild(m_pParticleBubble);
-        float w = m_pSpriteFish->getContentSize().width / 2.0f;
-        offsetPoint(ptStart, cosf(angle) * w, sinf(angle) * w);
+        self:setParticleBubble(cc.ParticleSystemQuad::create("bubble.plist"));
+        m_pGameLayer:addChild(m_pParticleBubble);
+        float w = m_pSpriteFish:getContentSize().width / 2.0f;
+        self:offsetPoint(ptStart, cosf(angle) * w, sinf(angle) * w);
         m_pParticleBubble->setPosition(ptStart);
-        offsetPoint(ptEnd, cosf(angle) * w, sinf(angle) * w);
-        Action *act = MoveTo::create(moveto->getDuration(), ptEnd);
-        m_pParticleBubble->setAutoRemoveOnFinish(false);
-        m_pParticleBubble->setPositionType(kCCPositionTypeFree);
-        m_pParticleBubble->runAction(act);
-    }
+        self:offsetPoint(ptEnd, cosf(angle) * w, sinf(angle) * w);
+        lcoal act = cc.MoveTo:create(moveto:getDuration(), ptEnd);
+        m_pParticleBubble:setAutoRemoveOnFinish(false);
+        m_pParticleBubble:setPositionType(kCCPositionTypeFree);
+        m_pParticleBubble:runAction(act);
+    end
+
+    return moveto
+    
 }
 
-void Fish::removeSelf()
+
+function Fish:removeSelf()
 {
-    this->getGameLayer()->getFishes()->removeObject(this); 
-    m_pSpriteFish->removeFromParentAndCleanup(true);
+    self:getGameLayer():getFishes():removeObject(this); 
+    m_pSpriteFish:removeFromParentAndCleanup(true);
 
-    if(m_bParticleBubble && m_pParticleBubble)
-       m_pParticleBubble->removeFromParentAndCleanup(true);
+    if m_bParticleBubble && m_pParticleBubble then
+       m_pParticleBubble:removeFromParentAndCleanup(true);
+    end
 }
+
+return Fish
