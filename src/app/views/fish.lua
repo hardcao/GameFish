@@ -66,7 +66,7 @@ function Fish:initWithFishType(fishType, gameLayer, pBatchNode)
     if(m_nFishType == 11 || m_nFishType == 12)
         m_bParticleBubble = true;
     
-    auto *frames = Array::create();
+    local frames = {};
     for(int i = 1; i <= 16; i++)
     {
 
