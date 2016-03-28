@@ -2,7 +2,6 @@
 local MyApp = class("MyApp", cc.load("mvc").AppBase)
 
 function MyApp:onCreate()
-<<<<<<< HEAD
      local cache = cc.SpriteFrameCache:getInstance()
     local filename = "fish3"
    
@@ -18,9 +17,6 @@ function MyApp:onCreate()
     local animation = display.newAnimation(animFrames, 0.3)
         -- caching animation
     display.setAnimationCache(filename, animation)
-=======
-    math.randomseed(os.time())
->>>>>>> fd3e9f912c00090bf99f23971a69329d73570211
 end
 
 return MyApp
