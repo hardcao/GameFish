@@ -1,5 +1,6 @@
 local GameLayer = class("GameLayer")
 local Cannon = import(".Cannon")
+local Fish = import(".Fish")
 
 local FishInBatchNode1 = {1, 2, 3, 4, 5, 6, 7, 8, 9, 13, 14};
 
@@ -12,9 +13,10 @@ local FishInBatchNode2 = {10, 18};
 
 local FishInBatchNode4 = {11, 12};
 
-local    scheduler = cc.Director:getInstance():getScheduler()
+local scheduler = cc.Director:getInstance():getScheduler()
 local updateFish_updateFish = nil
 local updateFish_updateGame = nil
+local MAX_FISH_COUNT = 15
 
 GameLayer::GameLayer():m_pBullets(NULL),m_pFishes(NULL),/*m_pRollNumGroup(NULL),*/
 	m_nScore(0),m_pCannon(NULL),m_pSpriteAdd(NULL){
@@ -185,47 +187,27 @@ function GameLayer:addFish(){
         local type = math.random() % 18 + 1;
         
         if NULL==loadFishSpriteBatchNode then
-            for(int i=0;i<GET_ARRAY_LEN(FishInBatchNode1);++i){
-                if (type==FishInBatchNode1[i]) {
+            for i=0,table.getn(FishInBatchNode1) then
+                if  type==FishInBatchNode1[i] then
                     loadFishSpriteBatchNode=m_pBatchNodeFish1;
                     break;
-                }
-            }
+                end
+            end
         end
         if(NULL==loadFishSpriteBatchNode){
-            for(int i=0;i<GET_ARRAY_LEN(FishInBatchNode2);++i){
-                if (type==FishInBatchNode2[i]) {
+            for i=0,table.getn(FishInBatchNode2) then
+                if type==FishInBatchNode2[i] then
                     loadFishSpriteBatchNode=m_pBatchNodeFish2AndBullets;
                     break;
-                }
-            }
-        }
-		/*
-        if(NULL==loadFishSpriteBatchNode){
-            for(int i=0;i<GET_ARRAY_LEN(FishInBatchNode3);++i){
-                if (type==FishInBatchNode3[i]) {
-                    loadFishSpriteBatchNode=m_pBatchNodeFish3AndNets;
-                    break;
-                }
-            }
-        }
-		*/
+                end
+            end
+        end
+		
 
-		/*
-        if(NULL==loadFishSpriteBatchNode){
-            for(int i=0;i<GET_ARRAY_LEN(FishInBatchNode4);++i){
-                if (type==FishInBatchNode4[i]) {
-                    loadFishSpriteBatchNode=m_pBatchNodeFish4;
-                    break;
-                }
-            }
-        }
-		*/
-
-        if(loadFishSpriteBatchNode){
-            Fish::createWithFishType(type, this, loadFishSpriteBatchNode);
+        if loadFishSpriteBatchNode then
+            Fish:createWithFishType(type, this, loadFishSpriteBatchNode);
             return;
-        } 
+        end
     
     end
     loadFishSpriteBatchNode=NULL;
@@ -234,60 +216,57 @@ function GameLayer:addFish(){
 
 end
 
-void GameLayer::updateFish(float dt){
-    if(m_pFishes->count() < MAX_FISH_COUNT)
-    {
-        int n = MAX_FISH_COUNT - m_pFishes->count();
-        int nAdd = rand() % n + 1;
+function GameLayer:updateFish(float dt){
+    if table.getn(m_pFishes) < MAX_FISH_COUNT then
+    
+        local n = MAX_FISH_COUNT - table.getn(m_pFishes);
+        local x = 1 nAdd = math.random() % n + 1;
 
-        for(int i = 0; i < nAdd; i++)
-        {
-            this->addFish();
-        }
-    }
+        for i = 0,nAdd then
+            self:addFish()
+        end
+    end
 }
-
-Rect shrinkRect(Rect rc, float xr, float yr)
+end
+function GameLayer:shrinkRect(rc, xr,yr)
 {
-    float w = rc.size.width * xr;
-    float h = rc.size.height * yr;
-    Point pt = Point(rc.origin.x + rc.size.width * (1.0f - xr) / 2,
+    local w = rc.size.width * xr;
+    local h = rc.size.height * yr;
+    local pt = cc.p(rc.origin.x + rc.size.width * (1.0f - xr) / 2,
                      rc.origin.y + rc.size.height * (1.0f - yr) / 2);
-    return Rect(pt.x, pt.y, w, h);
+    return cc.Rect(pt.x, pt.y, w, h);
 }
+end
 
-void GameLayer::updateGame(float dt)
+function GameLayer:updateGame(float dt)
 {
-    Object *pFishObj = NULL;
-    Object *pBulletObj = NULL;
-    CCARRAY_FOREACH(m_pBullets, pBulletObj)
-    {
-        Bullet *pBullet = (Bullet *)pBulletObj;
-        if(pBullet->getCaught())
+    local pFishObj = nil;
+    local pBulletObj = nil;
+    for i=0,table.getn(self.m_pBullets) then
+        local pBullet = self.m_pBullets[i];
+        if(pBullet:getCaught())
             continue;
-        bool caught = false;
-        CCARRAY_FOREACH(m_pFishes, pFishObj)
-        {
-            Fish *pFish = (Fish *)pFishObj;
-            if(pFish->getCaught())
+        local caught = false;
+        for i=0,table.getn(self.m_pFishes) then
+            local pFish = self.m_pFishes[i];
+            if(pFish:getCaught())
                 continue;
             
-			
-            Rect hittestRect = shrinkRect(pFish->getSpriteFish()->boundingBox(), 0.8f, 0.5f);
+            local hittestRect = self:shrinkRect(pFish:getSpriteFish():boundingBox(), 0.8f, 0.5f);
             
-            if(hittestRect.containsPoint(pBullet->getSpriteBullet()->getPosition()))
-            {
+            if hittestRect.containsPoint(pBullet:getSpriteBullet():getPosition()) then
                 caught = true;
-                pFish->showCaught();
+                pFish:showCaught();
                 m_nScore += 125;
                 m_pRollNumGroup->setValue(m_nScore);
-            }
-			
-        }
+            end
+        end
         
         if(caught)
         {
             pBullet->showNet();
         }
     }
+    end
 }
+end
