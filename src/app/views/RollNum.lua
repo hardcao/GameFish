@@ -3,7 +3,7 @@ local RollNum = class("RollNum")
 RollNum.NUMBERHEIGHT = 16
 RollNum.NUMBERWIDTH = 12
 RollNum.NUMBERWIDTH  = 196
-local    scheduler = cc.Director:getInstance():getScheduler()
+local scheduler = cc.Director:getInstance():getScheduler()
 
 local SpriteEase_entry = nil
 

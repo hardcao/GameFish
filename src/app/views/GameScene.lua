@@ -1,4 +1,4 @@
-local GameLayer = class("GameLayer")
+local GameScene = class("GameScene", cc.load("mvc").ViewBase)
 local Cannon = import(".Cannon")
 local Fish = import(".Fish")
 
@@ -18,12 +18,8 @@ local updateFish_updateFish = nil
 local updateFish_updateGame = nil
 local MAX_FISH_COUNT = 15
 
-GameLayer::GameLayer():m_pBullets(NULL),m_pFishes(NULL),/*m_pRollNumGroup(NULL),*/
-	m_nScore(0),m_pCannon(NULL),m_pSpriteAdd(NULL){
-    
-}
 
-function GameLayer:ctor()
+function GameScene:ctor()
     self.m_pBullets = nil
     self.m_pFishes = nil
     self.m_nScore = 0
@@ -32,7 +28,7 @@ function GameLayer:ctor()
     self.m_pRollNumGroup = nil
 end
 
-function GameLayer:init(){
+function GameScene:init()
     this:setTouchEnabled(true);
     this:initFrames();
     this:initBackground();
@@ -42,9 +38,9 @@ function GameLayer:init(){
     updateFish_updateFish = scheduler:scheduleScriptFunc(self:updateFish, 1.0)
     updateFish_updateGame = scheduler:scheduleScriptFunc(self:updateFish, 1.0)
     return true;
-}
+end
 
-function GameLayer:initListeners()
+function GameScene:initListeners()
 
 
      local listener = cc.EventListenerTouchOneByOne:create()
@@ -58,7 +54,7 @@ function GameLayer:initListeners()
 end
 
 
-function GameLayer:initFrames(){
+function GameScene:initFrames(){
     cc.SpriteFrameCache:getInstance():addSpriteFramesWithFile("fish.plist");
     cc.SpriteFrameCache:getInstance():addSpriteFramesWithFile("fish2.plist");
     cc.SpriteFrameCache:getInstance():addSpriteFramesWithFile("fish3.plist");
@@ -66,7 +62,7 @@ function GameLayer:initFrames(){
     cc.SpriteFrameCache:getInstance():addSpriteFramesWithFile("cannon.plist");
 end
 
-function GameLayer:initBackground(){
+function GameScene:initBackground(){
     local texture=cc.Director:getInstance():getTextureCache():addImage("bj01.jpg");
     local pBackGround =  cc.Sprite:createWithTexture(batchNode:getTexture())
 
@@ -90,11 +86,11 @@ function GameLayer:initBackground(){
     m_pRollNumGroup:setPosition(Point(353, 21));    
 end
 
-function GameLayer:initFishes(){
+function GameScene:initFishes(){
 
 	local texture = cc.Director:getInstance():getTextureCache():addImage("fish.png");
     this.setBatchNodeFish1(cc.Sprite:createWithTexture(texture));
-    this:addChild(this->m_pBatchNodeFish1); 
+    this:addChild(this.m_pBatchNodeFish1); 
     
     texture = cc.Director:getInstance():getTextureCache():addImage("fish2.png");
     self.m_pBatchNodeFish2AndBullets=cc.Sprite:createWithTexture(texture);
@@ -105,13 +101,13 @@ function GameLayer:initFishes(){
     self:addChild(self.m_pBatchNodeFish3AndNets);
     
      
-    this->setFishes(Array::createWithCapacity(MAX_FISH_COUNT));
+   -- this->setFishes(Array::createWithCapacity(MAX_FISH_COUNT));
     m_pFishes:removeAllObjects();
 
 
 end
 
-function GameLayer:initCannon()
+function GameScene:initCannon()
 
     self.m_Bullets = {};
     Texture2D *ptexture=cc.Director:getInstance():getTextureCache():addImage("cannon.png");
@@ -132,25 +128,26 @@ function GameLayer:initCannon()
     self:addChild(self.m_pSpriteReduce,101);
 end
 
-function GameLayer:addConnonSize()
+function GameScene:addConnonSize()
     local curConnonType=self.m_pCannon:getConnonType();
-    if(++curConnonType>7){
-        curConnonType=1;
-    }
+    curConnonType += 1
+    if urConnonType>7 then
+        curConnonType=1
+    end
    -- CC_SAFE_DELETE(this->m_pCannon);
     self.m_Cannon =Cannon:createWithCannonType(curConnonType, self, self:getChildByTag(7)));
 
 end
-function GameLayer:reduceConnonSize()
+function GameScene:reduceConnonSize()
     local curConnonType=self.m_pCannon:getConnonType();
-    if(--curConnonType<1){
+  
         curConnonType=7;
-    }
-    --CC_SAFE_DELETE(this->m_pCannon);
+    
+    
     self.m_Cannon =Cannon:createWithCannonType(curConnonType, self, self:getChildByTag(7)));
 end
 
-function GameLayer:onTouchBegan(pTouch, pEvent)
+function GameScene:onTouchBegan(pTouch, pEvent)
 
 	local rect = this.m_pSpriteAdd:getBoundingBox()
     if  cc.rectContainsPoint(rect, pTouch:getLocation()) then
@@ -169,19 +166,19 @@ function GameLayer:onTouchBegan(pTouch, pEvent)
 
 end
 
-function GameLayer:onTouchMoved(pTouch, pEvent) 
-{
+function GameScene:onTouchMoved(pTouch, pEvent) 
+
 	local pt = pTouch:getLocation()
 	this.m_pCannon:rotateToPoint(pt);
-}
+
 end		
-function GameLayer:onTouchEnded(cocos2d::Touch *pTouch, cocos2d::Event *pEvent)
+function GameScene:onTouchEnded(cocos2d::Touch *pTouch, cocos2d::Event *pEvent)
 
 	self.m_pCannon:fire();
 
 end
 
-function GameLayer:addFish(){
+function GameLayer:addFish() 
     local loadFishSpriteBatchNode=NULL;
     while 1 
         local type = math.random() % 18 + 1;
@@ -212,11 +209,11 @@ function GameLayer:addFish(){
     end
     loadFishSpriteBatchNode=NULL;
      
-}
+
 
 end
 
-function GameLayer:updateFish(float dt){
+function GameScene:updateFish(dt)
     if table.getn(m_pFishes) < MAX_FISH_COUNT then
     
         local n = MAX_FISH_COUNT - table.getn(m_pFishes);
@@ -226,20 +223,20 @@ function GameLayer:updateFish(float dt){
             self:addFish()
         end
     end
-}
+
 end
-function GameLayer:shrinkRect(rc, xr,yr)
-{
+function GameScene:shrinkRect(rc, xr,yr)
+
     local w = rc.size.width * xr;
     local h = rc.size.height * yr;
     local pt = cc.p(rc.origin.x + rc.size.width * (1.0f - xr) / 2,
                      rc.origin.y + rc.size.height * (1.0f - yr) / 2);
     return cc.Rect(pt.x, pt.y, w, h);
-}
+
 end
 
-function GameLayer:updateGame(float dt)
-{
+function GameScene:updateGame(floatdt)
+
     local pFishObj = nil;
     local pBulletObj = nil;
     for i=0,table.getn(self.m_pBullets) then
@@ -262,11 +259,13 @@ function GameLayer:updateGame(float dt)
             end
         end
         
-        if(caught)
-        {
+        if caught then
+        
             pBullet->showNet();
-        }
-    }
+        
+    
     end
-}
+
 end
+
+return GameScene
