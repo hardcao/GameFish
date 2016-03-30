@@ -17,7 +17,7 @@ function RollNumGroup:createWithGameLayer(pGameLayer, nDigit)
     self:initWithGameLayer(pGameLayer, nDigit)
 
 end
-function RollNumGroup:initWithGameLayer(GameLayer *pGameLayer, int nDigit)
+function RollNumGroup:initWithGameLayer(pGameLayer, nDigit)
     self.m_pGameLayer = pGameLayer;
    
     local pTex = cc.TextureCache:getInstance():addImage("number.png");
@@ -25,12 +25,9 @@ function RollNumGroup:initWithGameLayer(GameLayer *pGameLayer, int nDigit)
     
     self.m_pGameLayer:addChild(m_pBatchNode, 100);
     
-    for i = 1,nDigit then
-    
-        
+    for i = 1,nDigit do
         local pRollNum = RollNum:create();
         self.m_pRollNumArray[i] = pRollNum;
-        
         self.m_pBatchNode:addChild(pRollNum);
     end
     return true;
@@ -39,32 +36,30 @@ end
 function RollNumGroup:setPosition(pt)
 
     self.m_ptPosition = pt;
-    for i = 0,self.m_pRollNumArray:count() then
+    for i = 0,self.m_pRollNumArray:count() do
     
         local pRollNum = self.m_pRollNumArray[i];
         pRollNum:setPosition(pt);
-        pt.x -= 20.7f;
+        pt.x = pt.x - 20.7;
     
     end
 
 end
 
 function RollNumGroup:setValue(nValue)
-
-   
-    if self m_nValue == nValue then
+    if self.m_nValue == nValue then
         return;
     end
     
     local bUp = m_nValue < nValue;
     self.m_nValue = nValue;
     
-    for  i = 0,self.m_pRollNumArray:count() then
+    for  i = 0,self.m_pRollNumArray:count() do
     
-        local pRollNum = m_pRollNumArray[i];
+        local pRollNum = self.m_pRollNumArray[i];
         local num = nValue % 10;
         
-        if pRollNum:getNumber() != num then
+        if pRollNum:getNumber() ~= num then
           
             pRollNum:setNumber(num, bUp);
         end

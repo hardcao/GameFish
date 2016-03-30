@@ -1,7 +1,11 @@
 
 local MainScene = class("MainScene", cc.load("mvc").ViewBase)
 local Fish = import(".Fish")
-
+local Cannon = import(".Cannon")
+local Bullet = import(".Bullet")
+local RollNum = import(".RollNum")
+local RollNumGroup = import(".RollNumGroup")
+local GameScene = import(".GameScene")
 function MainScene:onCreate()
     -- add background image
     display.newSprite("MainSceneBg.jpg")

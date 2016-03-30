@@ -19,16 +19,16 @@ end
 function RollNum:init()
 
 	fullpath = cc.FileUtils:getInstance():fullPathForFilename("number.png");
-	m_pTexture = director:getTextureCache():getTextureForKey(fullpath);
+	m_pTexture = cc.director:getTextureCache():getTextureForKey(fullpath);
     local pFrame = cc.SpriteFrame:createWithTexture(m_pTexture, Rect(0, 0, NUMBERWIDTH, NUMBERHEIGHT));
     self:nitWithSpriteFrame(pFrame);
-    self:setScale(1.0f);
+    self:setScale(1.0);
     return true;
 end
 
 function RollNum:updateNumber(dt)
 
-    if self.m_bRolling && self.m_nCurTexH == self.m_nEndTexH then
+    if self.m_bRolling and self.m_nCurTexH == self.m_nEndTexH then
         scheduler:unscheduleScriptEntry(SpriteEase_entry)
         m_bRolling = false;
         return;
@@ -37,15 +37,15 @@ function RollNum:updateNumber(dt)
 
     if m_bUp then
     
-        self.m_nCurTexH += 4;
+        self.m_nCurTexH = self.m_nCurTexH + 4;
         if self.m_nCurTexH >= self.TEXTUREHEIGHT then
             self.m_nCurTexH = 0;
         end
-    elseif
-    
-        self.m_nCurTexH -= 4;
+    else
+        self.m_nCurTexH = self.m_nCurTexH - 4
         if self.m_nCurTexH < 0 then
-            self.m_nCurTexH = TEXTUREHEIGHT;
+            self.m_nCurTexH = TEXTUREHEIGHT
+        end
     end
 
     local h = m_nCurTexH;
@@ -62,9 +62,13 @@ function RollNum:setNumber(ivar, bUp)
     self.m_nNumber = var;
     self.m_bUp = bUp;
     self.m_nEndTexH = m_nNumber * (NUMBERHEIGHT + 4);
-    SpriteEase_entry = scheduler:scheduleScriptFunc(self:updateNumber, 3.0)
+    local function updateNumber1(dt)
+        self:updateNumber(dt)
+    end
+    SpriteEase_entry = scheduler:scheduleScriptFunc(updateNumber1,3.0)
    
 end
+
 function RollNum:getNumber()
     return self.m_nNumber;
 end

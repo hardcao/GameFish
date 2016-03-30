@@ -6,10 +6,6 @@ local FishInBatchNode1 = {1, 2, 3, 4, 5, 6, 7, 8, 9, 13, 14};
 
 local FishInBatchNode2 = {10, 18};
 
-// 这两种鱼的被捕获到后的帧图与游动帧图被分割到了两个不同的大图中分别fish2.png与fish3.png，
-// 导致在鱼儿被捕时播放Fish::showCaught()时在其m_pBatchNodeFish3AndNets中找不到对应的被捕帧图而抛出异常。
-
-//const int FishInBatchNode3 = {16, 17};
 
 local FishInBatchNode4 = {11, 12};
 
@@ -35,8 +31,11 @@ function GameScene:init()
 	this:initListeners();
     this:initFishes();
     this:initCannon();
-    updateFish_updateFish = scheduler:scheduleScriptFunc(self:updateFish, 1.0)
-    updateFish_updateGame = scheduler:scheduleScriptFunc(self:updateFish, 1.0)
+     local function updateFish1()
+        self:updateFish()
+    end
+    updateFish_updateFish = scheduler:scheduleScriptFunc(updateFish1, 1.0)
+    updateFish_updateGame = scheduler:scheduleScriptFunc(updateFish1, 1.0)
     return true;
 end
 

@@ -1,5 +1,5 @@
 local Cannon = class("Cannon")
-function Cannon:createWithCannonType(cannonType, pGameLayer, pBatchNode){
+function Cannon:createWithCannonType(cannonType, pGameLayer, pBatchNode)
    self.m_pGameLayer = pGameLayer
    self.m_nCannonType = cannonType
    self.m_fRotation = 0;
@@ -7,7 +7,7 @@ function Cannon:createWithCannonType(cannonType, pGameLayer, pBatchNode){
 	if self:initWithCannonType(pBatchNode) then
         return self
     end
-}
+
 end
 
 
@@ -31,39 +31,39 @@ function Cannon:initWithCannonType( pBatchNode)
 end
 
 function Cannon:rotateToPoint(ptToX, ptToY)
-{
+
     local ptNowX,ptNowY =self.m_pSprite:getPosition();
-    local angle=Math:atan2f(ptToY-ptNowY,ptNowX-ptNowX)/3.14 * 180.0f;
-    self:setRotation(90.0f-angle);
+    local angle=Math:atan2f(ptToY-ptNowY,ptNowX-ptNowX)/3.14 * 180.0;
+    self:setRotation(90.0-angle);
     self.m_pDirection= ptTo;
-}
+
 end
 
 function Cannon:setRotation(rotation)
-{
+
 	self.m_fRotation=rotation;
-	local absf_rotation=fabsf(m_fRotation-self.m_pSprite:getRotation());
-    local duration=absf_rotation/180.0f*0.2f;
+	local absf_rotation=math.abs(m_fRotation-self.m_pSprite:getRotation());
+    local duration=absf_rotation/180.0*0.2;
 
     local pAction = cc.RotateTo:create(duration, m_fRotation);
     self.m_pSprite:runAction(pAction);
-}
+
 end
 function Cannon:fire()
 
 
-    local pFireStartFrameName=string.format("actor_cannon1_%d1.png",this->m_nCannonType);
-    local pFireEndFrameName=string.format("actor_cannon1_%d2.png",this->m_nCannonType);
+    local pFireStartFrameName=string.format("actor_cannon1_%d1.png",self.m_nCannonType);
+    local pFireEndFrameName=string.format("actor_cannon1_%d2.png",self.m_nCannonType);
 	local pFireStartFrame=cc.SpriteFrameCache:getInstance():getSpriteFrame(pFireStartFrameName);
-    local FireEndFrame=SpriteFrameCache::getInstance()->spriteFrameByName(pFireEndFrameName->getCString());
+    local FireEndFrame=cc.SpriteFrameCache:getInstance():spriteFrameByName(pFireEndFrameName);
     local frames = {pFireStartFrame,FireEndFrame}
-	local pAnimationFire=cc.Animation:createWithSpriteFrames(frames,0.1f);
+	local pAnimationFire=cc.Animation:createWithSpriteFrames(frames,0.1);
     pAnimationFire:setRestoreOriginalFrame(true);
     local pAction=cc.CCAnimate:create(pAnimationFire);
     self.m_pSprite:runAction(pAction);
     
-    local pBullet = Bullet:createWithBulletType(m_nCannonType, self.m_pGameLayer, self.m_pGameLayer:getBatchNodeFish2AndBullets(), sm_pGameLayer:getBatchNodeFish3AndNets());
-    pBullet->shootTo(this->m_pDirection);
+    local pBullet = Bullet:createWithBulletType(self.m_nCannonType, self.m_pGameLayer, self.m_pGameLayer:getBatchNodeFish2AndBullets(), self.m_pGameLayer:getBatchNodeFish3AndNets());
+    self.pBullet:shootTo(self.m_pDirection);
 
 
 end
