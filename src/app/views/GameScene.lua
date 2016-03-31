@@ -1,4 +1,5 @@
 local GameScene = class("GameScene", cc.load("mvc").ViewBase)
+local RollNumGroup = import(".RollNumGroup")
 local Cannon = import(".Cannon")
 local Fish = import(".Fish")
 
@@ -53,7 +54,7 @@ function GameScene:initListeners()
 end
 
 
-function GameScene:initFrames(){
+function GameScene:initFrames()
     cc.SpriteFrameCache:getInstance():addSpriteFramesWithFile("fish.plist");
     cc.SpriteFrameCache:getInstance():addSpriteFramesWithFile("fish2.plist");
     cc.SpriteFrameCache:getInstance():addSpriteFramesWithFile("fish3.plist");
@@ -61,11 +62,11 @@ function GameScene:initFrames(){
     cc.SpriteFrameCache:getInstance():addSpriteFramesWithFile("cannon.plist");
 end
 
-function GameScene:initBackground(){
+function GameScene:initBackground()
     local texture=cc.Director:getInstance():getTextureCache():addImage("bj01.jpg");
     local pBackGround =  cc.Sprite:createWithTexture(batchNode:getTexture())
 
-    pBackGround:setAnchorPoint(Point(0.5f, 0.5f));
+    pBackGround:setAnchorPoint(cc.p(0.5, 0.5));
     local winSize=cc.director:sharedDirector():getWinSize();
     pBackGround:setPosition(cc.p(winSize.width/2, winSize.height/2));
     self:addChild(pBackGround);
@@ -78,14 +79,14 @@ function GameScene:initBackground(){
     
     texture=cc.Director:getInstance():getTextureCache():addImage("ui_box_02.png");
     local pBottomBar=cc.Sprite:createWithTexture(texture);
-    pBottomBar:setPosition(Point(440, 90));
+    pBottomBar:setPosition(cc.p(440, 90));
     self:addChild(pBottomBar,100);
 
-	self:setRollNumGroup(RollNumGroup:createWithGameLayer(this, 6));
-    m_pRollNumGroup:setPosition(Point(353, 21));    
+	self.m_pRollNumGroup= RollNumGroup:createWithGameLayer(self, 6)
+    self.m_pRollNumGroup:setPosition(cc.p(353, 21));    
 end
 
-function GameScene:initFishes(){
+function GameScene:initFishes()
 
 	local texture = cc.Director:getInstance():getTextureCache():addImage("fish.png");
     this.setBatchNodeFish1(cc.Sprite:createWithTexture(texture));
@@ -96,7 +97,7 @@ function GameScene:initFishes(){
     self:addChild(self.m_pBatchNodeFish2AndBullets);
     
     texture = cc.Director:getInstance():getTextureCache():addImage("fish3.png");
-    self:m_pBatchNodeFish3AndNets=SpriteBatchNode::createWithTexture(texture);
+    self.m_pBatchNodeFish3AndNets=cc.SpriteBatchNode:createWithTexture(texture);
     self:addChild(self.m_pBatchNodeFish3AndNets);
     
      
@@ -109,41 +110,39 @@ end
 function GameScene:initCannon()
 
     self.m_Bullets = {};
-    Texture2D *ptexture=cc.Director:getInstance():getTextureCache():addImage("cannon.png");
+    local ptexture=cc.Director:getInstance():getTextureCache():addImage("cannon.png");
     local pBatchNode=cc.SpriteBatchNode:create(ptexture);
     self:addChild(pBatchNode,101,7);
     self.m_Cannon= Cannon:createWithCannonType(6, self, self.pBatchNode);
     
     self.m_pSpriteAdd=cc.Sprite:createWithSpriteFrameName("button_add.png");
     self.m_pSpriteAdd:setPosition(cc.p(585,28));
-    self.m_pSpriteAdd:setScale(1.5f);
+    self.m_pSpriteAdd:setScale(1.5);
     self.addChild(self.m_pSpriteAdd,101);
     
-    Texture2D *texture2dReduce= TextureCache::getInstance()->addImage("button_reduce.png");
-    SpriteFrame *spriteFrameReduceNormal=SpriteFrame::createWithTexture(texture2dReduce, Rect(0, 0, texture2dReduce->getContentSize().width/2, texture2dReduce->getContentSize().height));
+    local texture2dReduce=  cc.Director:getInstance():getTextureCache():addImage("button_reduce.png");
+    local spriteFrameReduceNormal=cc.SpriteBatchNode:createWithTexture(texture2dReduce, cc.rect(0, 0, texture2dReduce:getContentSize().width/2, texture2dReduce:getContentSize().height));
     self.m_pSpriteReduce=cc.Sprite:createWithSpriteFrameName("button_reduce.png");
     self.m_pSpriteReduce:setPosition(cc.p(450,28));
-    self.m_pSpriteReduce:setScale(1.5f);
+    self.m_pSpriteReduce:setScale(1.5);
     self:addChild(self.m_pSpriteReduce,101);
 end
 
 function GameScene:addConnonSize()
     local curConnonType=self.m_pCannon:getConnonType();
-    curConnonType += 1
+    curConnonType = curConnonType + 1
     if urConnonType>7 then
         curConnonType=1
     end
    -- CC_SAFE_DELETE(this->m_pCannon);
-    self.m_Cannon =Cannon:createWithCannonType(curConnonType, self, self:getChildByTag(7)));
+    self.m_Cannon =Cannon:createWithCannonType(curConnonType, self, self:getChildByTag(7));
 
 end
+
 function GameScene:reduceConnonSize()
     local curConnonType=self.m_pCannon:getConnonType();
-  
-        curConnonType=7;
-    
-    
-    self.m_Cannon =Cannon:createWithCannonType(curConnonType, self, self:getChildByTag(7)));
+    curConnonType=7;
+    self.m_Cannon =Cannon:createWithCannonType(curConnonType, self, self:getChildByTag(7));
 end
 
 function GameScene:onTouchBegan(pTouch, pEvent)
@@ -171,27 +170,28 @@ function GameScene:onTouchMoved(pTouch, pEvent)
 	this.m_pCannon:rotateToPoint(pt);
 
 end		
-function GameScene:onTouchEnded(cocos2d::Touch *pTouch, cocos2d::Event *pEvent)
+function GameScene:onTouchEnded(pTouch, pEvent)
 
 	self.m_pCannon:fire();
 
 end
 
-function GameLayer:addFish() 
-    local loadFishSpriteBatchNode=NULL;
-    while 1 
-        local type = math.random() % 18 + 1;
+function GameScene:addFish() 
+    local loadFishSpriteBatchNode=nil;
+     local type= 0
+    while (true) do
+        type = math.random() % 18 + 1;
         
-        if NULL==loadFishSpriteBatchNode then
-            for i=0,table.getn(FishInBatchNode1) then
+        if nil==loadFishSpriteBatchNode then
+            for i=0,table.getn(FishInBatchNode1) do
                 if  type==FishInBatchNode1[i] then
                     loadFishSpriteBatchNode=m_pBatchNodeFish1;
                     break;
                 end
             end
         end
-        if(NULL==loadFishSpriteBatchNode){
-            for i=0,table.getn(FishInBatchNode2) then
+        if nil==loadFishSpriteBatchNode then
+            for i=0,table.getn(FishInBatchNode2) do
                 if type==FishInBatchNode2[i] then
                     loadFishSpriteBatchNode=m_pBatchNodeFish2AndBullets;
                     break;
@@ -200,13 +200,13 @@ function GameLayer:addFish()
         end
 		
 
-        if loadFishSpriteBatchNode then
+        if loadFishSpriteBatchNode  then
             Fish:createWithFishType(type, this, loadFishSpriteBatchNode);
             return;
         end
     
     end
-    loadFishSpriteBatchNode=NULL;
+    loadFishSpriteBatchNode=nil;
      
 
 
@@ -218,7 +218,7 @@ function GameScene:updateFish(dt)
         local n = MAX_FISH_COUNT - table.getn(m_pFishes);
         local x = 1 nAdd = math.random() % n + 1;
 
-        for i = 0,nAdd then
+        for i = 0,nAdd do
             self:addFish()
         end
     end
@@ -228,8 +228,8 @@ function GameScene:shrinkRect(rc, xr,yr)
 
     local w = rc.size.width * xr;
     local h = rc.size.height * yr;
-    local pt = cc.p(rc.origin.x + rc.size.width * (1.0f - xr) / 2,
-                     rc.origin.y + rc.size.height * (1.0f - yr) / 2);
+    local pt = cc.p(rc.origin.x + rc.size.width * (1.0 - xr) / 2,
+                     rc.origin.y + rc.size.height * (1.0 - yr) / 2);
     return cc.Rect(pt.x, pt.y, w, h);
 
 end
@@ -238,33 +238,30 @@ function GameScene:updateGame(floatdt)
 
     local pFishObj = nil;
     local pBulletObj = nil;
-    for i=0,table.getn(self.m_pBullets) then
+    for i=0,table.getn(self.m_pBullets) do
         local pBullet = self.m_pBullets[i];
-        if(pBullet:getCaught())
-            continue;
-        local caught = false;
-        for i=0,table.getn(self.m_pFishes) then
-            local pFish = self.m_pFishes[i];
-            if(pFish:getCaught())
-                continue;
+        if pBullet:getCaught()  == false then
+            local caught = false;
+            for i=0,table.getn(self.m_pFishes) do
+                local pFish = self.m_pFishes[i];
+                if pFish:getCaught()  == false then
+                  
+                    local hittestRect = self:shrinkRect(pFish:getSpriteFish():boundingBox(), 0.8, 0.5);
             
-            local hittestRect = self:shrinkRect(pFish:getSpriteFish():boundingBox(), 0.8f, 0.5f);
-            
-            if hittestRect.containsPoint(pBullet:getSpriteBullet():getPosition()) then
-                caught = true;
-                pFish:showCaught();
-                m_nScore += 125;
-                m_pRollNumGroup->setValue(m_nScore);
+                    if hittestRect.containsPoint(pBullet:getSpriteBullet():getPosition()) then
+                        caught = true;
+                        pFish:showCaught();
+                        m_nScore = m_nScore + 125;
+                        self.m_pRollNumGroup:setValue(m_nScore);
+                    end
+                end
             end
         end
         
         if caught then
-        
-            pBullet->showNet();
-        
-    
+            pBullet:showNet()
+        end
     end
-
 end
 
 return GameScene
